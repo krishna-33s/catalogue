@@ -50,6 +50,7 @@ pipeline {
                 }
             }
         }
+    }    
     post {
         always {
             echo "docker image is built"
