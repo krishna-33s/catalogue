@@ -61,5 +61,4 @@ pipeline {
             echo "building image failed"
         }
     }
-    }
 }
