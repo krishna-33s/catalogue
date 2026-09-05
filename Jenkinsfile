@@ -7,6 +7,8 @@ pipeline {
     environment {
         version = ""
         app_name = "catalogue"
+        region = "us-east-1"
+        id = "220719767845"
     }
     options {
         // disableConcurrentBuilds()
@@ -44,8 +46,13 @@ pipeline {
         stage("build docker image") {
             steps {
                 script{
+                    withAWS(credentials: 'aws creds', region: ${region}) {
+
                     sh """
-                        docker build -t ${app_name}:${version} .
+                        aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${id}.dkr.ecr.${region}.amazonaws.com
+                        docker build -t ${id}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${version} .
+                        docker push ${id}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${version}
+                        
                     """
                 }
             }
