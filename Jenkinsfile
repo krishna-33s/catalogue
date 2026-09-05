@@ -52,8 +52,9 @@ pipeline {
                         aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${id}.dkr.ecr.${region}.amazonaws.com
                         docker build -t ${id}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${version} .
                         docker push ${id}.dkr.ecr.${region}.amazonaws.com/roboshop/catalogue:${version}
-                        
+
                     """
+                    }
                 }
             }
         }
