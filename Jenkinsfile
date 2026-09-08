@@ -109,7 +109,7 @@ pipeline {
                             --pkg-types os \
                             --exit-code 1 \
                             --severity HIGH,CRITICAL \
-                            --format table ${id}.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue:${appVersion}
+                            --format table ${id}.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue:${version}
                         """,
                         returnStatus: true
                     )
