@@ -8,11 +8,11 @@ FROM node:20.20.2-alpine3.22
 WORKDIR /app
 EXPOSE 8080
 COPY --from=builder /app /app
+RUN apk update && apk upgrade  
 # ENV MONGO="true" \
 #     MONGO_URL="mongodb://mongodb:27017/catalogue"
 RUN addgroup -S roboshop && adduser -S roboshop -G roboshop && \
-    chown -R roboshop:roboshop /app
-RUN apk update && apk upgrade    
+    chown -R roboshop:roboshop /app  
 USER roboshop
 CMD ["server.js"]
 ENTRYPOINT ["node"]
