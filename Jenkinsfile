@@ -83,7 +83,7 @@ pipeline {
                                 def fixedin = alert.security_advisory?.fixed_in ?: 'No fix available'
                                 echo "Package: ${pkg}, GHSA: ${ghsa}, Summary: ${summaryText}, Fixed in: ${fixedin}"
                                 }
-                                error "pipeline failed: $(alerts.size()) high or critical Dependabot alert(s) found. Please address them before proceeding."
+                                error "pipeline failed: ${alerts.size()} high or critical Dependabot alert(s) found. Please address them before proceeding."
                         }
                     }
                 }
