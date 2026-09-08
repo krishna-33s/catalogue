@@ -50,20 +50,24 @@ pipeline {
                         def owner = 'krishna-33s'
                         def repo = 'catalogue'
 
-                        
                         def response = sh(
-                            script: """
-                                curl -s -w "HTTPSTATUS:%{http_code}" \
-                                -H "Authorization: Bearer ${GH_TOKEN}" \
-                                -H "Accept: application/vnd.github+json" \
+                            script: '''
+                                curl -s -w "\\nHTTPSTATUS:%{http_code}" \\
+                                -H "Authorization: Bearer $GH_TOKEN" \\
+                                -H "Accept: application/vnd.github+json" \\
                                 "https://api.github.com/repos/${owner}/${repo}/dependabot/alerts?severity=high,critical&state=open&per_page=100"
-                            """,
+                            ''',
                             returnStdout: true
                         ).trim()
 
-                        def parts = response.tokenize('\n')
-                        def httpStatus = parts[-1].trim()
-                        def body = parts[0..-2].join('\n')
+                        // Split on the last "HTTPSTATUS:" marker instead of newline,
+                        // since GitHub's JSON body is a single line with no separator.
+                        def matcher = (response =~ /(?s)^(.*)\nHTTPSTATUS:(\d+)$/)
+                        if (!matcher.matches()) {
+                            error("Could not parse curl response: ${response}")
+                        }
+                        def body = matcher.group(1)
+                        def httpStatus = matcher.group(2)
 
                         if (httpStatus != '200') {
                             error("GitHub API call failed. HTTP status: ${httpStatus}. Response: ${body}")
@@ -72,23 +76,22 @@ pipeline {
                         def alerts = readJSON text: body
 
                         if (alerts.size() == 0) {
-                            echo "✅ No open high or critical severity Dependabot alerts found.pipeline continues"
-                        }
-                        else {
+                            echo "✅ No open high or critical severity Dependabot alerts found. Pipeline continues."
+                        } else {
                             echo "\n⚠️  Found ${alerts.size()} high and critical Dependabot alert(s):"
-                                alerts.each { alert ->
+                            alerts.each { alert ->
                                 def pkg = alert.security_vulnerability?.package?.name ?: 'unknown'
                                 def ghsa = alert.security_advisory?.ghsa_id ?: 'unknown'
                                 def summaryText = alert.security_advisory?.summary ?: 'No summary'
-                                def fixedin = alert.security_advisory?.fixed_in ?: 'No fix available'
+                                def fixedin = alert.security_vulnerability?.first_patched_version?.identifier ?: 'No fix available'
                                 echo "Package: ${pkg}, GHSA: ${ghsa}, Summary: ${summaryText}, Fixed in: ${fixedin}"
-                                }
-                                error "pipeline failed: ${alerts.size()} high or critical Dependabot alert(s) found. Please address them before proceeding."
+                            }
+                            error "Pipeline failed: ${alerts.size()} high or critical Dependabot alert(s) found. Please address them before proceeding."
                         }
                     }
                 }
-            }       
-        }       
+            }
+        }
         stage("build docker image") {
             steps {
                 script{
