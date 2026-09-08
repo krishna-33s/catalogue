@@ -120,6 +120,19 @@ pipeline {
                 }
             }
         }
+        stage('ECR Image push') {
+            steps {
+                script {
+                    // in this block we get aws authentication
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                        sh """
+                            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${id}.dkr.ecr.us-east-1.amazonaws.com
+                            docker push ${id}.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue:${version}
+                        """
+                    }
+                }
+            }
+        }
     }    
     post {
         always {
