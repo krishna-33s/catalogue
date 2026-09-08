@@ -12,6 +12,7 @@ COPY --from=builder /app /app
 #     MONGO_URL="mongodb://mongodb:27017/catalogue"
 RUN addgroup -S roboshop && adduser -S roboshop -G roboshop && \
     chown -R roboshop:roboshop /app
+RUN apk update && apk upgrade    
 USER roboshop
 CMD ["server.js"]
 ENTRYPOINT ["node"]
