@@ -43,7 +43,7 @@ pipeline {
             }
         }
         
-        stage('SonarQube Analysis'){
+        stage('SonarQube Analysis') {
             steps {
                 script {
                     def scannerHome = tool name: 'sonar-8'
